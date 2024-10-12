@@ -7,10 +7,12 @@ Problem market is a *trustless* smart contract system to equitably compensate de
 ### What this means:
 
 NO LITIGATION: Don't break the bank going to court. Your agreement is written is backed by Stellar's blockchain! This way, no one can cheat their way out of an agreement.
+
 NO MORE CREDENTIALISM: You can be a kid, a college dropout – doesn't matter. If you can get things done, you deserve the contract.
+
 NO MORE EXTORTIONATE CONTRACTS: If freelancer(s) don't deliver on their promise, they should only be partially compensated.
 
-### How it works in a nutshell:
+### How it works:
 
 1. Connect your crypto wallet to our platform.
 2. Configure the parameters (e.g., description, prize money) for your issue on the Problem Market platform.
@@ -28,7 +30,20 @@ They won't; however, receive ANY details about the people involved.
 
 We're starting with the dev world, but we're aiming to create a safe smart contract protocol for all types of jobs/business opportunities!
 
+## Be a Contributor 
 Join us in our mission in creating an anti-corrupt service marketplace!
+
+### Github Webhooks
+
+Set up your clone of our repository, and test our webhook functionality by changing directory to the `/webhook` folder.
+
+Then, testing the Rust webhook server through `$ cargo run`, which runs on global port `0.0.0.0:3000`.
+
+To receive github webhooks, use `smee.io` to retrieve a payload url. This will be the proxy url (relay url) you'll **need** to test webhooks in a local environment.
+
+Set up a test github repository, and play around with how you can create new conditions based off webhook payload data.
+
+Have fun!
 
 ## Project Structure
 ```text
