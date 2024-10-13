@@ -6,6 +6,7 @@ use soroban_sdk::testutils::{Address as _, AuthorizedFunction, AuthorizedInvocat
 use soroban_sdk::{symbol_short, token, vec, Address, Env, IntoVal};
 use token::Client as TokenClient;
 use token::StellarAssetClient as TokenAdminClient;
+use tracing::info;
 
 fn create_token_contract<'a>(e: &Env, admin: &Address) -> (TokenClient<'a>, TokenAdminClient<'a>) {
     let sac = e.register_stellar_asset_contract_v2(admin.clone());
@@ -35,6 +36,8 @@ impl<'a> ClaimableBalanceTest<'a> {
         env.ledger().with_mut(|li| {
             li.timestamp = 12345;
         });
+        // info! loggs the timestamp
+        info!("Ledger timestamp: {}", env.ledger().timestamp());
 
         let deposit_address = Address::generate(&env);
 

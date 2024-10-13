@@ -8,11 +8,13 @@
 
 use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env, Vec};
 
+
 #[derive(Clone)]
 #[contracttype]
 pub enum DataKey {
     Init,
     Balance,
+    PullRequest, // I think this imports pub struct
 }
 
 #[derive(Clone)]
@@ -40,40 +42,17 @@ pub struct ClaimableBalance {
 
 #[contract]
 pub struct ClaimableBalanceContract;
-
-
 // function 1: timestamp
 // The 'timelock' part: check that provided timestamp is before/after
 // the current ledger timestamp.
 fn check_time_bound(env: &Env, time_bound: &TimeBound) -> bool {
-    let ledger_timestamp: u64 = env.ledger().timestamp(); // added unsigned 64bit timestamp
+    let ledger_timestamp: u64 = env.ledger().timestamp(); // typecasted unsigned 64bit 
 
     match time_bound.kind {
         TimeBoundKind::Before => ledger_timestamp <= time_bound.timestamp,
         TimeBoundKind::After => ledger_timestamp >= time_bound.timestamp,
     }
 }
-
-// #[derive(Deserialize, Debug)]
-struct JurorWalletAddresses {
-    juror: i32,
-}
-
-// but our juror will be the code quality :))))
-async fn jury() -> bool {
-    let jurors: &Vec<i32> = &claimable_balance.jurors; // we'll add jurors to claimable_balance as they might deserve to be paid
-
-    if (!jurors.contains(jurors)) {
-        panic!("Juror not eligible to judge")
-    }
-}
-
-// missing function? => pledging functionality
-/*
-* `from` address issuing a boolean condition? <= Boolean I feel might be fallible
-* written string? use GPT => Hallucination, not trust worthy
-* List of boolean -> autonomously checked by webhook listener
- */
 
 // impl == class for contract where you claim balance
 #[contractimpl]
@@ -124,12 +103,13 @@ impl ClaimableBalanceContract {
         // Make sure claimant has authorized this call, which ensures their
         // identity.
         claimant.require_auth();
-        // Just get the balance - if it's been claimed, this will simply panic
-        // and terminate the contract execution.
+        
+        // Check if the merge was successful
+        let merge_status: bool = env.storage().instance().get(&DataKey::MergeStatus).unwrap_or(false);
+        if !merge_status {
+        panic!("merge was not successful, cannot claim");
+        }
 
-        // unwrap -> leads to panick right?
-        // Problem: Based off balance, means that they can't receive other payments in the mean time?
-        // Panick if DataKey -> returns None
         let claimable_balance: ClaimableBalance =
             env.storage().instance().get(&DataKey::Balance).unwrap(); // recommended not to use .unwrap()
 

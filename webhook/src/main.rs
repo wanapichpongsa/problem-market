@@ -9,27 +9,26 @@ use serde::Deserialize;
 use tracing::info;
 use tracing_subscriber;
 #[derive(Deserialize, Debug)]
-struct PullRequestPayload {
-    action: String, // closed/open, we'll see if bool is more efficient
+pub struct PullRequestPayload {
+    action: String, // closed/open
     pull_request: PullRequest, // defined in successor struct
 }
 #[derive(Deserialize, Debug)]
-struct PullRequest {
+pub struct PullRequest {
     merged: bool,
     user: User,
-    merged_at: Option<String>, // None, SOme?
+    merged_at: Option<String>, // 2024-10-13T01:57:59Z
 }
-// unfortunately need to define new struct since we need to specify login object :(
+
 #[derive(Deserialize, Debug)]
-struct User {
+pub struct User {
     login: String,
-    id: i8, // I think
-    // url: String, // perhaps define string literal? https:\/\/www.github.com\/+. or *.
+    id: u64, 
 }
 // payload is the identifier/code-name for webhooks we receive
-// POST route handler
+// POST route handler                                       // use Hashmap <type, vector> if possible for dynamic processing.
 async fn webhook_handler(Json(payload): Json<PullRequestPayload>) -> impl IntoResponse { // interesting name (maybe PayloadResponse)
-    info!("Received webhook: {:?}", payload);
+    info!("Received webhook: {:?}", payload); // {:?} synonymous with ?payload, "str"
     // if payload.__owner.url == payload.__user.commit.url ?
     if payload.action == "closed" && payload.pull_request.merged { // if merged from payload.pull_request.merged is True? ("pull_request" is from json, not Rust struct)
         info!("Pull request merged by: {} (ID: {}) through {}", 
@@ -42,23 +41,19 @@ async fn webhook_handler(Json(payload): Json<PullRequestPayload>) -> impl IntoRe
         );
         //macro logging info (console.log + format string) for successful operations?
     }
-    // user.login -> String: claimant address relational database
-    // interaction with smart contract?
     "Webhook received and processed"
+    // throw an error when you can
 }
 // server.at("/*").all(|req| async move {
 // info!("Received request on path {}", req.url.path())
 // })
 #[tokio::main]
 async fn main() {
-    // Set up logging....
-    // needs to be a loop?
+    // will trace basic logger to stdout i.e., will 'print' webhook events.
     tracing_subscriber::fmt::init();
-    // info!("webhook received at {}");
-    // variable/const for each webhook request
-    // Build the Axum app with the webhook route
+    
     let app: Router = Router::new()
-        .route("/webhook", post(webhook_handler)); // might have to keep as "/"
+        .route("/", post(webhook_handler)); // might have to keep as "/"
     // message comes from webhook_handler :)
     // route is HTTP method, addr is IP address and Port
     let address: SocketAddr = SocketAddr::from(([0, 0, 0, 0], 3000));
