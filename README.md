@@ -4,6 +4,8 @@ This is the official Problem Market repository.
 
 Problem market is a *trustless* smart contract system to equitably compensate developers on github. This means, rather than a fixed contract (that tends to undervalue or overvalue someone's work), developers will be hired based off their contribution, not how good their CV looks!
 
+[Quick demo](https://www.youtube.com/watch?v=gZAQVz69f6I)
+
 ### What this means:
 
 NO LITIGATION: Don't break the bank going to court. Your agreement is written is backed by Stellar's blockchain! This way, no one can cheat their way out of an agreement.
