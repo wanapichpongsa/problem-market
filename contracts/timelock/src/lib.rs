@@ -5,8 +5,6 @@
 //! account(s) claim it before or after provided time point.
 //! For simplicity, the contract only supports invoker-based auth.
 #![no_std]
-pub mod webhooks;
-use webhooks::{PullRequestPayload, PullRequest, Payload};
 
 use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env, Vec};
 
@@ -15,7 +13,6 @@ use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env, Vec
 pub enum DataKey {
     Init,
     Balance,
-    PullRequestPayload, 
 }
 
 #[derive(Clone)]
@@ -66,7 +63,6 @@ impl ClaimableBalanceContract {
         amount: i128,
         claimants: Vec<Address>,
         time_bound: TimeBound,
-        payload: PullRequestPayload,
     ) {
         if claimants.len() > 1 { // changed to 1 
             panic!("too many claimants");
@@ -92,7 +88,6 @@ impl ClaimableBalanceContract {
                 amount,
                 time_bound,
                 claimants,
-                payload,
             },
         );
 
@@ -109,10 +104,6 @@ impl ClaimableBalanceContract {
         claimant.require_auth();
         
         // Check if the merge was successful
-        let merge_status: bool = env.storage().instance().get(&DataKey::MergeStatus).unwrap_or(false);
-        if !merge_status {
-        panic!("merge was not successful, cannot claim");
-        }
 
         let claimable_balance: ClaimableBalance =
             env.storage().instance().get(&DataKey::Balance).unwrap(); // recommended not to use .unwrap()

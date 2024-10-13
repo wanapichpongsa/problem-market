@@ -3,6 +3,9 @@ name = "webhooks"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
 axum = "0.6"
 serde = { version = "1.0", features = ["derive"] }
@@ -10,3 +13,5 @@ serde_json = "1.0"
 tokio = { version = "1", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
+soroban-sdk = { workspace = true }
+stellar_sdk = "^0.1.4"
