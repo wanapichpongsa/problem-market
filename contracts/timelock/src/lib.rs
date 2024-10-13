@@ -7,14 +7,14 @@
 #![no_std]
 
 use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env, Vec};
-
+use webhook::{ PullRequestPayload, PullRequest, User};
 
 #[derive(Clone)]
 #[contracttype]
 pub enum DataKey {
     Init,
     Balance,
-    PullRequest, // I think this imports pub struct
+    PullRequestPayload, 
 }
 
 #[derive(Clone)]
@@ -65,6 +65,7 @@ impl ClaimableBalanceContract {
         amount: i128,
         claimants: Vec<Address>,
         time_bound: TimeBound,
+        payload: PullRequestPayload,
     ) {
         if claimants.len() > 1 { // changed to 1 
             panic!("too many claimants");
@@ -76,7 +77,7 @@ impl ClaimableBalanceContract {
         // arguments.
         from.require_auth();
 
-        // Transfer token from `from` to this contract address.
+        // Transfer token from `from` to escrow address.
         token::Client::new(&env, &token).transfer(&from, &env.current_contract_address(), &amount);
         // Store all the necessary info to allow one of the claimants to claim it.
 
@@ -90,8 +91,10 @@ impl ClaimableBalanceContract {
                 amount,
                 time_bound,
                 claimants,
+                payload,
             },
         );
+
         // Mark contract as initialized to prevent double-usage.
         // Note, that this is just one way to approach initialization - it may
         // be viable to allow one contract to manage several claimable balances.

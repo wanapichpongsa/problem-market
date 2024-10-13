@@ -1,13 +1,11 @@
 use axum::{
-    routing::post,
-    extract::Json, // {Path, Query Json?}
-    Router,
+    extract::Json,
     response::IntoResponse,
 };
-use std::net::SocketAddr;
+
 use serde::Deserialize;
 use tracing::info;
-use tracing_subscriber;
+
 #[derive(Deserialize, Debug)]
 pub struct PullRequestPayload {
     action: String, // closed/open
@@ -27,7 +25,7 @@ pub struct User {
 }
 // payload is the identifier/code-name for webhooks we receive
 // POST route handler                                       // use Hashmap <type, vector> if possible for dynamic processing.
-async fn webhook_handler(Json(payload): Json<PullRequestPayload>) -> impl IntoResponse { // interesting name (maybe PayloadResponse)
+pub async fn webhook_handler(Json(payload): Json<PullRequestPayload>) -> impl IntoResponse { // interesting name (maybe PayloadResponse)
     info!("Received webhook: {:?}", payload); // {:?} synonymous with ?payload, "str"
     // if payload.__owner.url == payload.__user.commit.url ?
     if payload.action == "closed" && payload.pull_request.merged { // if merged from payload.pull_request.merged is True? ("pull_request" is from json, not Rust struct)
@@ -47,20 +45,3 @@ async fn webhook_handler(Json(payload): Json<PullRequestPayload>) -> impl IntoRe
 // server.at("/*").all(|req| async move {
 // info!("Received request on path {}", req.url.path())
 // })
-#[tokio::main]
-async fn main() {
-    // will trace basic logger to stdout i.e., will 'print' webhook events.
-    tracing_subscriber::fmt::init();
-    
-    let app: Router = Router::new()
-        .route("/", post(webhook_handler)); // might have to keep as "/"
-    // message comes from webhook_handler :)
-    // route is HTTP method, addr is IP address and Port
-    let address: SocketAddr = SocketAddr::from(([0, 0, 0, 0], 3000));
-    info!("server running on {}", address); 
-    //with hyper rust, can run on global server
-    axum::Server::bind(&address)
-    .serve(app.into_make_service())
-    .await
-    .expect("Failed to start server");
-}
