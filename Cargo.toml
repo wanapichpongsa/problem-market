@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-  "contracts/*", "webhook", "webhooks",
+  "contracts/*", "webhooks",
 ]
 
 [workspace.dependencies]

@@ -5,9 +5,10 @@
 //! account(s) claim it before or after provided time point.
 //! For simplicity, the contract only supports invoker-based auth.
 #![no_std]
+pub mod webhooks;
+use webhooks::{PullRequestPayload, PullRequest, Payload};
 
 use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env, Vec};
-use webhook::{ PullRequestPayload, PullRequest, User};
 
 #[derive(Clone)]
 #[contracttype]

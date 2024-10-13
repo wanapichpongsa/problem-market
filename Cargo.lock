@@ -1522,7 +1522,7 @@ version = "0.0.0"
 dependencies = [
  "soroban-sdk",
  "tracing",
- "webhook",
+ "webhooks",
 ]
 
 [[package]]
@@ -1927,18 +1927,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d5a015fe95f3504a94bb1462c717aae75253e39b9dd6c3fb1062c934535c64aa"
 dependencies = [
  "indexmap-nostd",
-]
-
-[[package]]
-name = "webhook"
-version = "0.1.0"
-dependencies = [
- "axum",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]

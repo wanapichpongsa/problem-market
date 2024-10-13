@@ -11,7 +11,7 @@ doctest = false
 [dependencies]
 soroban-sdk = { workspace = true }
 tracing = "0.1"
-webhook = { path = "../../webhook" }
+webhooks = { path = "../../webhooks" }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
