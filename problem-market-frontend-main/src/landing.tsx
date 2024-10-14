@@ -2,20 +2,74 @@ import { Textarea } from "./components/ui/textarea";
 import { Button } from "./components/ui/button";
 import { Label } from "./components/ui/label";
 import { useState } from "react";
+import axios from 'axios';
 
 function Landing() {
     const [repoUrl, setRepoUrl] = useState<string>("");
+    const [url, setUrl] = useState<string>("");
     const [username, setUsername] = useState<string>("");
     const [nextPage, setNextPage] = useState<boolean>(false);
     const [publicKey, setPublicKey] = useState<string>("");
     const [contributorKey, setContributorKey] = useState<string>("");
+    const [privateKey, setPrivateKey] = useState<string>("");
+    const [conPrivKey, setConPrivKey] = useState<string>("");
     const [prizeMoney, setPrizeMoney] = useState<number>(0);
     const [description, setDescription] = useState<string>("");
+
+    // Function to check if a GitHub pull request is merged
+    async function isPullRequestMerged(repoUrl: string) {
+        try {
+            // Extract owner, repo, and pull number from the URL
+            const urlParts = repoUrl.split('/');
+            const owner = urlParts[3];
+            const repo = urlParts[4];
+            const pullNumber = urlParts[6];
+    
+            const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}`);
+            console.log(`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}`)
+            return response.data.merged;
+        } catch (error: any) {
+            console.error('Error fetching pull request status:', error.message);
+            return false; // Assume not merged on error
+        }
+    }
+
+    async function createEscrowe() {
+        // Data for the POST request
+        const data = {
+            privateKey,
+            publicKey,
+            prizeMoney,
+        };
+
+        // Axios POST request to the `/create-escrow` endpoint
+        await axios.post('http://localhost:3000/create-escrow', data)
+        .then((response: { data: any; }) => {
+            console.log('Escrow payment created successfully:', response.data);
+        })
+        .catch((error: { response: { data: any; }; message: any; }) => {
+            console.error('Error creating escrow:', error.response ? error.response.data : error.message);
+        });
+    }
+
+    async function claimBounty() {
+        const data = {
+            conPrivKey
+        }
+
+        await axios.post('http://localhost:3000/create-escrow', data)
+        .then((response: { data: any; }) => {
+            console.log('Escrow payment created successfully:', response.data);
+        })
+        .catch((error: { response: { data: any; }; message: any; }) => {
+            console.error('Error creating escrow:', error.response ? error.response.data : error.message);
+        });
+    }
 
     const confirmBounty = () => {
         let condition = confirm(`Are you sure you would like to proceed?\n\nYour GitHub Repository: ${repoUrl}\nYour Stellar Wallet Public Key: ${publicKey}\nYour Bounty Reward: ${prizeMoney}`)
         if (condition) {
-            // add shit
+            createEscrowe();
             alert("Bounty has been successfully added. Thank you for using our services.")
             location.reload()
         }
@@ -31,12 +85,20 @@ function Landing() {
     };
 
     // Example usage
-    const handleGitHubAuth = () => {
+    const handleGitHubAuth = async (): Promise<void> => {
         if (username) {
-            let condition = confirm(`You are about to be redirected to Github. Once you have authorized your GitHub Account, the Bounty Rewards will be automatizally transferred to your Stellar Wallet.\n\nYour Stellar Wallet Public Key: ${contributorKey}\n\nIf your public key is correct, click OK to proceed. Thank you for using our services.`)
-            condition && redirectToGitHubAuth(username);
-        }
-    };
+            if (await isPullRequestMerged(url)) {
+                let condition = confirm(`You are about to be redirected to Github. Once you have authorized your GitHub Account, the Bounty Rewards will be automatizally transferred to your Stellar Wallet.\n\nYour Stellar Wallet Public Key: ${contributorKey}\n\nIf your public key is correct, click OK to proceed. Thank you for using our services.`)
+                if (condition) {
+                    claimBounty();
+                    redirectToGitHubAuth(username);
+                }
+            }
+            else {
+                alert("The pull request has not been merged yet. Please wait for the pull request to be merged before claiming your rewards.");
+            }
+        };
+    }
 
     if (nextPage) {
         return (
@@ -95,6 +157,14 @@ function Landing() {
                             <Textarea placeholder="e.g. GXXXXXXXXXXXXXXX..." 
                                 onChange={(e) => setPublicKey(e.target.value)}
                                 id="publicKey" />
+                                
+                        </div>
+                        <br />
+                        <div className="grid w-full gap-1.5">
+                            <Label htmlFor="priv" className="text-left">Enter your Stellar Wallet Private key</Label>
+                            <Textarea placeholder="e.g. XXXXXXXXXXXXXXX..." 
+                                onChange={(e) => setPrivateKey(e.target.value)}
+                                id="priv" />
                                 
                         </div>
                         <br />
@@ -164,11 +234,28 @@ function Landing() {
             <br />
 
             <div className="grid w-full gap-1.5">
+                <Label htmlFor="conpriv" className="text-left">Enter your Stellar Wallet Private key</Label>
+                <Textarea placeholder="e.g. XXXXXXXXXXXXXXX..." 
+                    onChange={(e) => setConPrivKey(e.target.value)}
+                    id="conpriv" />
+                    
+            </div>
+            <br />
+
+            <div className="grid w-full gap-1.5">
                 <Label htmlFor="user" className="text-left">Enter your GitHub Username</Label>
                 <Textarea placeholder="e.g. Your Username" 
                     onChange={(e) => setUsername(e.target.value)}
                     id="user" />
                     
+            </div>
+            <br />
+
+            <div className="grid w-full gap-1.5">
+                <Label htmlFor="url" className="text-left">Enter the URL to your merged pull request</Label>
+                <Textarea placeholder="e.g. https://github.com/owner/repo/pull/123" 
+                    onChange={(e) => setUrl(e.target.value)}
+                    id="url" />
             </div>
             <br />
 
